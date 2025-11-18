@@ -20,6 +20,33 @@ A modern, fully functional food ordering website built with Flask, Tailwind CSS,
 - **Database:** SQLite (development)
 - **Authentication:** Flask-Login with password hashing
 
+## Screenshots
+
+### Admin Dashboard
+![Admin Dashboard](ScreenShot/Admin%20Dashboard.jpeg)
+
+### Home
+![Home](ScreenShot/Home.jpeg)
+
+### My Profile
+![My Profile](ScreenShot/My%20Profile.jpeg)
+
+### Screenshot 1
+![Screenshot 1](ScreenShot/Screenshot_18-11-2025_211942_127.0.0.1.jpeg)
+
+### Screenshot 2
+![Screenshot 2](ScreenShot/Screenshot_18-11-2025_212036_127.0.0.1.jpeg)
+
+### Screenshot 3
+![Screenshot 3](ScreenShot/Screenshot_18-11-2025_212915_127.0.0.1.jpeg)
+
+### Screenshot 4
+![Screenshot 4](ScreenShot/Screenshot_18-11-2025_21292_127.0.0.1.jpeg)
+
+### Shopping Cart
+![Shopping Cart](ScreenShot/Shopping%20Cart.jpeg)
+
+
 ## Installation
 
 1. **Clone the repository**
