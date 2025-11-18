@@ -1,0 +1,144 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Home - Piyu's Kitchen - Authentic Indian Cuisine{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-gradient text-white py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+            <h1 class="text-5xl md:text-6xl font-bold mb-6">Authentic Indian Cuisine</h1>
+            <p class="text-xl md:text-2xl mb-8 text-gray-100">Experience the rich flavors of India, delivered fresh to your door</p>
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <a href="{{ url_for('main.menu') }}" class="bg-white text-orange-600 px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition">
+                    Browse Menu <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+                <a href="{{ url_for('cart.view_cart') }}" class="bg-orange-500 text-white px-8 py-3 rounded-full font-semibold hover:bg-orange-600 transition border-2 border-white">
+                    View Cart <i class="fas fa-shopping-cart ml-2"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="text-center p-6">
+                <div class="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-clock text-orange-600 text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Fast Delivery</h3>
+                <p class="text-gray-600">Get your food delivered hot and fresh in 30-45 minutes</p>
+            </div>
+            
+            <div class="text-center p-6">
+                <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-pepper-hot text-green-600 text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Authentic Spices</h3>
+                <p class="text-gray-600">Traditional recipes with authentic Indian spices and ingredients</p>
+            </div>
+            
+            <div class="text-center p-6">
+                <div class="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-star text-orange-600 text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Top Rated</h3>
+                <p class="text-gray-600">Loved by thousands of satisfied customers</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-bold text-gray-800 mb-4">Browse by Category</h2>
+            <p class="text-gray-600">Explore our wide variety of delicious options</p>
+        </div>
+        
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {% for category in categories %}
+            <a href="{{ url_for('main.menu', category=category.id) }}" class="bg-white rounded-lg p-6 text-center shadow-md hover:shadow-xl transition transform hover:-translate-y-2">
+                <div class="text-4xl mb-3">
+                    {% if 'Appetizer' in category.name %}🍴
+                    {% elif 'Main' in category.name %}🍽️
+                    {% elif 'Dessert' in category.name %}🍰
+                    {% elif 'Beverage' in category.name %}🥤
+                    {% else %}🍔{% endif %}
+                </div>
+                <h3 class="font-bold text-lg text-gray-800">{{ category.name }}</h3>
+                <p class="text-sm text-gray-600 mt-1">{{ category.menu_items|length }} items</p>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Featured Items Section -->
+<section class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-bold text-gray-800 mb-4">Featured Dishes</h2>
+            <p class="text-gray-600">Try our most popular items</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for item in featured_items %}
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden food-card">
+                <div class="h-48 bg-gray-200 flex items-center justify-center">
+                    {% if item.image_url %}
+                    <img src="{{ item.image_url }}" alt="{{ item.name }}" class="w-full h-full object-cover">
+                    {% else %}
+                    <i class="fas fa-utensils text-gray-400 text-6xl"></i>
+                    {% endif %}
+                </div>
+                
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-xl font-bold text-gray-800">{{ item.name }}</h3>
+                        <span class="text-orange-600 font-bold text-lg">₹{{ "%.0f"|format(item.price) }}</span>
+                    </div>
+                    
+                    <p class="text-gray-600 mb-4 text-sm">{{ item.description[:80] }}{% if item.description|length > 80 %}...{% endif %}</p>
+                    
+                    <div class="flex items-center justify-between">
+                        <div class="flex gap-1">
+                            {% if item.dietary_tags %}
+                                {% for tag in item.dietary_tags.split(',') %}
+                                <span class="text-xs px-2 py-1 rounded-full text-white badge-{{ tag.strip() }}">{{ tag.strip() }}</span>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        
+                        <button onclick="addToCart({{ item.id }})" class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition">
+                            <i class="fas fa-cart-plus"></i> Add
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-12">
+            <a href="{{ url_for('main.menu') }}" class="bg-orange-600 text-white px-8 py-3 rounded-full font-semibold hover:bg-orange-700 transition inline-block">
+                View Full Menu <i class="fas fa-arrow-right ml-2"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="bg-gradient-to-r from-purple-600 to-pink-600 text-white py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-4xl font-bold mb-4">Hungry? Order Now!</h2>
+        <p class="text-xl mb-8">Get your favorite meals delivered fresh and fast</p>
+        <a href="{{ url_for('main.menu') }}" class="bg-white text-orange-600 px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition inline-block">
+            Start Ordering <i class="fas fa-arrow-right ml-2"></i>
+        </a>
+    </div>
+</section>
+{% endblock %}

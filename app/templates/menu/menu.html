@@ -1,0 +1,145 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Menu - FoodMenu{% endblock %}
+
+{% block content %}
+<div class="bg-gray-50 min-h-screen py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Page Header -->
+        <div class="mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">Our Menu</h1>
+            <p class="text-gray-600">Discover our delicious selection of dishes</p>
+        </div>
+
+        <!-- Search and Filters -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <form method="GET" action="{{ url_for('main.menu') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <!-- Search -->
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+                    <input type="text" name="search" value="{{ search_query or '' }}" 
+                           placeholder="Search for dishes..." 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                </div>
+                
+                <!-- Category Filter -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                    <select name="category" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                        <option value="">All Categories</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}" {% if selected_category == category.id %}selected{% endif %}>
+                            {{ category.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Dietary Filter -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Dietary</label>
+                    <select name="dietary" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                        <option value="">All Items</option>
+                        <option value="vegetarian" {% if dietary_filter == 'vegetarian' %}selected{% endif %}>Vegetarian</option>
+                        <option value="vegan" {% if dietary_filter == 'vegan' %}selected{% endif %}>Vegan</option>
+                        <option value="gluten-free" {% if dietary_filter == 'gluten-free' %}selected{% endif %}>Gluten-Free</option>
+                        <option value="spicy" {% if dietary_filter == 'spicy' %}selected{% endif %}>Spicy</option>
+                    </select>
+                </div>
+                
+                <!-- Filter Button -->
+                <div class="md:col-span-4 flex gap-2">
+                    <button type="submit" class="bg-orange-600 text-white px-6 py-2 rounded-lg hover:bg-orange-700 transition">
+                        <i class="fas fa-search mr-2"></i>Apply Filters
+                    </button>
+                    <a href="{{ url_for('main.menu') }}" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition">
+                        <i class="fas fa-redo mr-2"></i>Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Results Info -->
+        <div class="mb-6">
+            <p class="text-gray-600">
+                Found <span class="font-bold">{{ menu_items|length }}</span> items
+                {% if search_query %}matching "{{ search_query }}"{% endif %}
+            </p>
+        </div>
+
+        <!-- Menu Items Grid -->
+        {% if menu_items %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for item in menu_items %}
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden food-card">
+                <div class="h-48 bg-gray-200 flex items-center justify-center relative">
+                    {% if item.image_url %}
+                    <img src="{{ item.image_url }}" alt="{{ item.name }}" class="w-full h-full object-cover">
+                    {% else %}
+                    <i class="fas fa-utensils text-gray-400 text-6xl"></i>
+                    {% endif %}
+                    
+                    {% if not item.is_available %}
+                    <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                        <span class="text-white font-bold text-lg">Currently Unavailable</span>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="p-6">
+                    <div class="flex items-start justify-between mb-2">
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold text-gray-800 mb-1">{{ item.name }}</h3>
+                            <p class="text-xs text-gray-500">
+                                <i class="fas fa-tag mr-1"></i>{{ item.category.name }}
+                            </p>
+                        </div>
+                        <span class="text-orange-600 font-bold text-xl">₹{{ "%.0f"|format(item.price) }}</span>
+                    </div>
+                    
+                    <p class="text-gray-600 mb-4 text-sm">{{ item.description[:100] }}{% if item.description|length > 100 %}...{% endif %}</p>
+                    
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex flex-wrap gap-1">
+                            {% if item.dietary_tags %}
+                                {% for tag in item.dietary_tags.split(',') %}
+                                <span class="text-xs px-2 py-1 rounded-full text-white badge-{{ tag.strip() }}">
+                                    {{ tag.strip() }}
+                                </span>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        
+                        <span class="text-xs text-gray-500">
+                            <i class="fas fa-clock mr-1"></i>{{ item.preparation_time }} min
+                        </span>
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        <button onclick="addToCart({{ item.id }})" 
+                                {% if not item.is_available %}disabled{% endif %}
+                                class="flex-1 bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed">
+                            <i class="fas fa-cart-plus mr-2"></i>Add to Cart
+                        </button>
+                        <a href="{{ url_for('main.item_detail', item_id=item.id) }}" 
+                           class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition">
+                            <i class="fas fa-info-circle"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="bg-white rounded-lg shadow-md p-12 text-center">
+            <i class="fas fa-search text-gray-400 text-6xl mb-4"></i>
+            <h3 class="text-2xl font-bold text-gray-800 mb-2">No items found</h3>
+            <p class="text-gray-600 mb-6">Try adjusting your filters or search terms</p>
+            <a href="{{ url_for('main.menu') }}" class="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition inline-block">
+                View All Items
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

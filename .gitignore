@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Flask
+instance/
+.env
+.flaskenv
+*.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploads
+app/static/uploads/menu_items/*
+!app/static/uploads/menu_items/.gitkeep
+
+# Testing
+.pytest_cache/
+htmlcov/
+.coverage

@@ -1,0 +1,128 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - FoodMenu{% endblock %}
+
+{% block content %}
+<div class="bg-gray-50 min-h-screen py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 class="text-4xl font-bold text-gray-800 mb-8">Admin Dashboard</h1>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm font-medium">Total Orders</p>
+                        <p class="text-3xl font-bold text-gray-800 mt-1">{{ total_orders }}</p>
+                    </div>
+                    <div class="bg-purple-100 w-12 h-12 rounded-full flex items-center justify-center">
+                        <i class="fas fa-shopping-bag text-orange-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm font-medium">Pending Orders</p>
+                        <p class="text-3xl font-bold text-yellow-600 mt-1">{{ pending_orders }}</p>
+                    </div>
+                    <div class="bg-yellow-100 w-12 h-12 rounded-full flex items-center justify-center">
+                        <i class="fas fa-clock text-yellow-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm font-medium">Menu Items</p>
+                        <p class="text-3xl font-bold text-gray-800 mt-1">{{ total_items }}</p>
+                    </div>
+                    <div class="bg-green-100 w-12 h-12 rounded-full flex items-center justify-center">
+                        <i class="fas fa-utensils text-green-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm font-medium">Customers</p>
+                        <p class="text-3xl font-bold text-gray-800 mt-1">{{ total_users }}</p>
+                    </div>
+                    <div class="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center">
+                        <i class="fas fa-users text-blue-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Quick Actions</h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <a href="{{ url_for('admin.add_menu_item') }}" class="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition text-center">
+                    <i class="fas fa-plus-circle mr-2"></i>Add Menu Item
+                </a>
+                <a href="{{ url_for('admin.menu_items') }}" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition text-center">
+                    <i class="fas fa-list mr-2"></i>Manage Menu
+                </a>
+                <a href="{{ url_for('admin.orders') }}" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition text-center">
+                    <i class="fas fa-shopping-bag mr-2"></i>View Orders
+                </a>
+                <a href="{{ url_for('admin.categories') }}" class="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition text-center">
+                    <i class="fas fa-tags mr-2"></i>Categories
+                </a>
+            </div>
+        </div>
+
+        <!-- Recent Orders -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Recent Orders</h2>
+            {% if recent_orders %}
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        {% for order in recent_orders %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{{ order.id }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ order.customer_name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ order.order_date.strftime('%m/%d/%Y %I:%M %p') }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-orange-600">₹{{ "%.0f"|format(order.total_amount) }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 py-1 text-xs rounded-full
+                                    {% if order.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                    {% elif order.status == 'confirmed' or order.status == 'preparing' %}bg-blue-100 text-blue-800
+                                    {% elif order.status == 'ready' or order.status == 'delivered' %}bg-green-100 text-green-800
+                                    {% else %}bg-red-100 text-red-800{% endif %}">
+                                    {{ order.status.capitalize() }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <a href="{{ url_for('admin.order_detail', order_id=order.id) }}" class="text-orange-600 hover:text-purple-700 font-semibold">
+                                    View Details
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-gray-600 text-center py-8">No orders yet</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

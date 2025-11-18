@@ -1,0 +1,78 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Manage Menu Items - Admin{% endblock %}
+
+{% block content %}
+<div class="bg-gray-50 min-h-screen py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800">Manage Menu Items</h1>
+            <a href="{{ url_for('admin.add_menu_item') }}" class="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition">
+                <i class="fas fa-plus-circle mr-2"></i>Add New Item
+            </a>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            {% if items %}
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Image</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        {% for item in items %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4">
+                                <div class="w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-400 rounded-lg flex items-center justify-center">
+                                    {% if item.image_url %}
+                                    <img src="{{ item.image_url }}" alt="{{ item.name }}" class="w-full h-full object-cover rounded-lg">
+                                    {% else %}
+                                    <i class="fas fa-utensils text-white"></i>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <p class="font-semibold text-gray-800">{{ item.name }}</p>
+                                <p class="text-sm text-gray-600">{{ item.description[:50] }}{% if item.description|length > 50 %}...{% endif %}</p>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-600">{{ item.category.name }}</td>
+                            <td class="px-6 py-4 text-sm font-semibold text-orange-600">?{{ "%.2f"|format(item.price) }}</td>
+                            <td class="px-6 py-4">
+                                {% if item.is_available %}
+                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Available</span>
+                                {% else %}
+                                <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">Unavailable</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex gap-2">
+                                    <a href="{{ url_for('admin.edit_menu_item', item_id=item.id) }}" class="text-blue-600 hover:text-blue-700">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form method="POST" action="{{ url_for('admin.delete_menu_item', item_id=item.id) }}" class="inline" onsubmit="return confirm('Are you sure?')">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="text-red-600 hover:text-red-700">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-gray-600 text-center py-12">No menu items yet. Add your first item!</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

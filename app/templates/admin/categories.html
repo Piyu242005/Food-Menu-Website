@@ -1,0 +1,40 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Manage Categories - Admin{% endblock %}
+
+{% block content %}
+<div class="bg-gray-50 min-h-screen py-8">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800">Manage Categories</h1>
+            <a href="{{ url_for('admin.add_category') }}" class="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition">
+                <i class="fas fa-plus-circle mr-2"></i>Add Category
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {% for category in categories %}
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800">{{ category.name }}</h3>
+                        <p class="text-gray-600 text-sm mt-1">{{ category.description }}</p>
+                        <p class="text-orange-600 text-sm mt-2">{{ category.menu_items|length }} items</p>
+                    </div>
+                    <span class="bg-purple-100 text-orange-600 px-3 py-1 rounded-full text-sm">Order: {{ category.display_order }}</span>
+                </div>
+                
+                <div class="flex gap-2 mt-4 pt-4 border-t">
+                    <a href="{{ url_for('admin.edit_category', category_id=category.id) }}" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-center">
+                        <i class="fas fa-edit mr-2"></i>Edit
+                    </a>
+                    <a href="{{ url_for('main.menu', category=category.id) }}" class="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition text-center">
+                        <i class="fas fa-eye mr-2"></i>View
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

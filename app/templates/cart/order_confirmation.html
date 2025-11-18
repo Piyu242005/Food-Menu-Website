@@ -1,0 +1,109 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Order Confirmation - FoodMenu{% endblock %}
+
+{% block content %}
+<div class="bg-gray-50 min-h-screen py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Success Message -->
+        <div class="bg-white rounded-lg shadow-lg p-8 text-center mb-8">
+            <div class="mb-6">
+                <i class="fas fa-check-circle text-green-500 text-6xl"></i>
+            </div>
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">Order Confirmed!</h1>
+            <p class="text-xl text-gray-600 mb-2">Thank you for your order</p>
+            <p class="text-gray-500">Order #{{ order.id }}</p>
+        </div>
+
+        <!-- Order Details -->
+        <div class="bg-white rounded-lg shadow-md p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Order Details</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <h3 class="font-semibold text-gray-700 mb-2">Delivery Information</h3>
+                    <p class="text-gray-600"><strong>Name:</strong> {{ order.customer_name }}</p>
+                    <p class="text-gray-600"><strong>Email:</strong> {{ order.customer_email }}</p>
+                    <p class="text-gray-600"><strong>Phone:</strong> {{ order.phone_number }}</p>
+                    <p class="text-gray-600"><strong>Address:</strong> {{ order.delivery_address }}</p>
+                </div>
+
+                <div>
+                    <h3 class="font-semibold text-gray-700 mb-2">Order Information</h3>
+                    <p class="text-gray-600"><strong>Order Date:</strong> {{ order.order_date.strftime('%B %d, %Y %I:%M %p') }}</p>
+                    <p class="text-gray-600"><strong>Status:</strong> 
+                        <span class="inline-block px-2 py-1 rounded text-sm bg-yellow-100 text-yellow-800">
+                            {{ order.status.capitalize() }}
+                        </span>
+                    </p>
+                    <p class="text-gray-600"><strong>Payment Method:</strong> {{ order.payment_method.capitalize() }}</p>
+                </div>
+            </div>
+
+            {% if order.special_instructions %}
+            <div class="mb-6">
+                <h3 class="font-semibold text-gray-700 mb-2">Special Instructions</h3>
+                <p class="text-gray-600 bg-gray-50 p-3 rounded">{{ order.special_instructions }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Order Items -->
+            <div class="border-t pt-6">
+                <h3 class="font-semibold text-gray-700 mb-4">Order Items</h3>
+                <div class="space-y-3">
+                    {% for item in order.order_items %}
+                    <div class="flex items-center justify-between py-2 border-b">
+                        <div class="flex items-center gap-3">
+                            <span class="text-gray-600">{{ item.quantity }}x</span>
+                            <span class="font-semibold">{{ item.menu_item.name }}</span>
+                        </div>
+                        <span class="font-semibold">₹{{ "%.0f"|format(item.price_at_purchase * item.quantity) }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Total -->
+                <div class="mt-6 pt-4 border-t">
+                    <div class="flex justify-between mb-2">
+                        <span class="text-gray-600">Subtotal</span>
+                        <span class="font-semibold">₹{{ "%.0f"|format(order.total_amount - 50) }}</span>
+                    </div>
+                    <div class="flex justify-between mb-2">
+                        <span class="text-gray-600">Delivery Fee</span>
+                        <span class="font-semibold">₹50</span>
+                    </div>
+                    <div class="flex justify-between text-xl font-bold text-orange-600">
+                        <span>Total</span>
+                        <span>₹{{ "%.0f"|format(order.total_amount) }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Next Steps -->
+        <div class="bg-blue-50 rounded-lg p-6 mb-8">
+            <h3 class="font-bold text-gray-800 mb-3">
+                <i class="fas fa-info-circle text-blue-500 mr-2"></i>What's Next?
+            </h3>
+            <ul class="space-y-2 text-gray-700">
+                <li><i class="fas fa-check text-green-500 mr-2"></i>We'll send you an email confirmation shortly</li>
+                <li><i class="fas fa-check text-green-500 mr-2"></i>Your order is being prepared</li>
+                <li><i class="fas fa-check text-green-500 mr-2"></i>Estimated delivery: 30-45 minutes</li>
+                <li><i class="fas fa-check text-green-500 mr-2"></i>Track your order status in your profile</li>
+            </ul>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{{ url_for('main.index') }}" class="bg-orange-600 text-white px-8 py-3 rounded-lg hover:bg-orange-700 transition text-center font-semibold">
+                <i class="fas fa-home mr-2"></i>Back to Home
+            </a>
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('auth.profile') }}" class="bg-gray-200 text-gray-700 px-8 py-3 rounded-lg hover:bg-gray-300 transition text-center font-semibold">
+                <i class="fas fa-user mr-2"></i>View My Orders
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

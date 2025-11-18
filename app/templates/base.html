@@ -1,0 +1,303 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com; img-src 'self' data: https: http:; font-src 'self' https://cdnjs.cloudflare.com;">
+    <title>{% block title %}Piyu's Kitchen - Authentic Indian Cuisine{% endblock %}</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Alpine.js for interactivity -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        /* Default Orange Theme */
+        :root {
+            --primary-color: #ff6b35;
+            --primary-hover: #e55a2b;
+            --gradient-start: #ff9933;
+            --gradient-mid: #ffffff;
+            --gradient-end: #138808;
+        }
+        
+        /* Mint-Yellow-Coral Theme */
+        body.theme-pastel {
+            --primary-color: #f27a7d;
+            --primary-hover: #e66a6d;
+            --gradient-start: #c5f9d7;
+            --gradient-mid: #f7d486;
+            --gradient-end: #f27a7d;
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #f7931e 50%, #c1272d 100%);
+        }
+        
+        .indian-gradient {
+            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-mid) 50%, var(--gradient-end) 100%);
+        }
+        
+        .theme-gradient-bg {
+            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-mid) 50%, var(--gradient-end) 100%);
+        }
+        
+        .food-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .food-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .theme-toggle {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: linear-gradient(135deg, #c5f9d7 0%, #f7d486 50%, #f27a7d 100%);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .theme-toggle::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        body.theme-pastel .theme-toggle::after {
+            transform: translateX(30px);
+        }
+        
+        body:not(.theme-pastel) .theme-toggle {
+            background: linear-gradient(135deg, #ff9933 0%, #ffffff 50%, #138808 100%);
+        }
+        
+        .badge-vegetarian { background: #10b981; }
+        .badge-vegan { background: #059669; }
+        .badge-gluten-free { background: #f59e0b; }
+        .badge-spicy { background: #ef4444; }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50" x-data="{ cartOpen: false, mobileMenuOpen: false }">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="{{ url_for('main.index') }}" class="flex items-center">
+                        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Piyu" class="h-10 w-10 rounded-full mr-3 object-cover">
+                        <span class="text-xl font-bold bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent">Piyu's Kitchen</span>
+                    </a>
+                    
+                    <!-- Desktop Navigation -->
+                    <div class="hidden md:flex ml-10 space-x-8">
+                        <a href="{{ url_for('main.index') }}" class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                        <a href="{{ url_for('main.menu') }}" class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">Menu</a>
+                        {% if current_user.is_authenticated and current_user.role == 'admin' %}
+                        <a href="{{ url_for('admin.dashboard') }}" class="text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">Admin</a>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Right side menu -->
+                <div class="flex items-center space-x-4">
+                    <!-- Theme Toggle -->
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xs text-gray-600 hidden md:block">Theme</span>
+                        <div class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme"></div>
+                    </div>
+                    
+                    <!-- Cart Button -->
+                    <a href="{{ url_for('cart.view_cart') }}" class="relative p-2 text-gray-700 hover:text-orange-600">
+                        <i class="fas fa-shopping-cart text-xl"></i>
+                        <span id="cart-badge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                    </a>
+                    
+                    {% if current_user.is_authenticated %}
+                    <!-- User Menu -->
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" class="flex items-center space-x-2 text-gray-700 hover:text-orange-600">
+                            <i class="fas fa-user-circle text-xl"></i>
+                            <span class="hidden md:block">{{ current_user.username }}</span>
+                            <i class="fas fa-chevron-down text-sm"></i>
+                        </button>
+                        
+                        <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                            <a href="{{ url_for('auth.profile') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <i class="fas fa-user mr-2"></i>Profile
+                            </a>
+                            <a href="{{ url_for('auth.logout') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                            </a>
+                        </div>
+                    </div>
+                    {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="hidden md:block text-gray-700 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium">Login</a>
+                    <a href="{{ url_for('auth.register') }}" class="hidden md:block bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-orange-700">Sign Up</a>
+                    {% endif %}
+                    
+                    <!-- Mobile menu button -->
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden p-2 rounded-md text-gray-700 hover:text-orange-600">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile menu -->
+        <div x-show="mobileMenuOpen" @click.away="mobileMenuOpen = false" x-transition class="md:hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 bg-white border-t">
+                <a href="{{ url_for('main.index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100">Home</a>
+                <a href="{{ url_for('main.menu') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100">Menu</a>
+                {% if current_user.is_authenticated %}
+                    {% if current_user.role == 'admin' %}
+                    <a href="{{ url_for('admin.dashboard') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100">Admin</a>
+                    {% endif %}
+                    <a href="{{ url_for('auth.profile') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100">Profile</a>
+                    <a href="{{ url_for('auth.logout') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100">Login</a>
+                    <a href="{{ url_for('auth.register') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100">Sign Up</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+                {% for category, message in messages %}
+                <div class="bg-{{ 'green' if category == 'success' else 'red' if category == 'danger' else 'blue' if category == 'info' else 'yellow' }}-100 border border-{{ 'green' if category == 'success' else 'red' if category == 'danger' else 'blue' if category == 'info' else 'yellow' }}-400 text-{{ 'green' if category == 'success' else 'red' if category == 'danger' else 'blue' if category == 'info' else 'yellow' }}-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <span class="block sm:inline">{{ message }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Piyu" class="h-8 w-8 rounded-full mr-2">
+                        Piyu's Kitchen
+                    </h3>
+                    <p class="text-gray-400">Authentic Indian cuisine delivered to your door. Fresh, flavorful, and made with love!</p>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2">
+                        <li><a href="{{ url_for('main.menu') }}" class="text-gray-400 hover:text-white">Menu</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">About Us</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Hours</h4>
+                    <p class="text-gray-400">Monday - Friday: 10am - 10pm</p>
+                    <p class="text-gray-400">Saturday - Sunday: 11am - 11pm</p>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Connect</h4>
+                    <div class="flex space-x-4">
+                        <a href="https://www.instagram.com/my.life_24143/" target="_blank" class="text-gray-400 hover:text-white text-xl" title="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.linkedin.com/in/piyush-ramteke-24-mylife" target="_blank" class="text-gray-400 hover:text-white text-xl" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                        <a href="https://github.com/Piyu242005" target="_blank" class="text-gray-400 hover:text-white text-xl" title="GitHub"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 FoodMenu. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Update cart badge on page load -->
+    <script>
+        // Theme Toggle Function
+        function toggleTheme() {
+            document.body.classList.toggle('theme-pastel');
+            const theme = document.body.classList.contains('theme-pastel') ? 'pastel' : 'default';
+            localStorage.setItem('theme', theme);
+        }
+        
+        // Load saved theme on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'pastel') {
+                document.body.classList.add('theme-pastel');
+            }
+            updateCartBadge();
+        });
+        
+        function updateCartBadge() {
+            fetch('{{ url_for("cart.cart_count") }}')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('cart-badge').textContent = data.count;
+                });
+        }
+        
+        // Add to cart function
+        function addToCart(itemId) {
+            fetch(`/cart/add/${itemId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateCartBadge();
+                    showNotification(data.message, 'success');
+                } else {
+                    showNotification(data.message, 'error');
+                }
+            });
+        }
+        
+        function showNotification(message, type) {
+            // Simple notification (you can enhance this)
+            alert(message);
+        }
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
